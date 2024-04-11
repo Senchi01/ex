@@ -5,6 +5,7 @@ from kivy.uix.image import Image
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 import cv2
+import numpy as np
 import pytesseract
 
 class MainApp(MDApp):
@@ -39,32 +40,44 @@ class MainApp(MDApp):
     def take_picture(self, *args):
       ret, frame = self.cap.read()
       if ret:
+          # Convert to HSV color space to detect blue color
+          hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+          # Define the range for blue color and create a mask
+          lower_blue = np.array([100, 150, 50])
+          upper_blue = np.array([140, 255, 255])
+          mask = cv2.inRange(hsv, lower_blue, upper_blue)
 
-          gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-          contrast = cv2.convertScaleAbs(gray, alpha=2, beta=0)
-          blur = cv2.GaussianBlur(contrast, (5, 5), 0)
-          edged = cv2.Canny(blur, 30, 150)
-          _, roi = cv2.threshold(edged, 125, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU ) 
-          contours, _ = cv2.findContours(roi, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+          # Find contours in the mask
+          contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
           for contour in contours:
-              perimeter = cv2.arcLength(contour, True)
-              approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
-              if len(approx) == 4 and cv2.contourArea(contour) < 100:  
-                  continue
+              # Approximate the contour to a polygon
+              epsilon = 0.1 * cv2.arcLength(contour, True)
+              approx = cv2.approxPolyDP(contour, epsilon, True)
 
-              x, y, w, h = cv2.boundingRect(contour)
-              # More refined aspect ratio check here
-              if w < 50 or h < 20:  
-                  continue
+              # Check if the approximated polygon has four sides (i.e., is a rectangle or square)
+              if len(approx) == 4:
+                  x, y, w, h = cv2.boundingRect(approx)
 
-              roi = gray[y:y+h, x:x+w]
-              text = pytesseract.image_to_string(roi, lang='swe', config='--psm 6')
-              # Simple post-processing: Check if the result is likely to be valid
-              if text.strip() not in self.recognized_words and len(text.strip()) > 3:
-                    self.recognized_words.add(text.strip())
-                    print(text)
-                    cv2.imshow(f'ROI {x},{y}', roi)
+                  # Extract ROI with some padding
+                  padding = 5  # Adjust padding as needed
+                  roi = frame[y-padding:y+h+padding, x-padding:x+w+padding]
+
+                  # Convert ROI to grayscale and apply threshold
+                  roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+                  _, roi_thresh = cv2.threshold(roi_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+                  # Apply OCR on the thresholded ROI
+                  text = pytesseract.image_to_string(roi_thresh, lang='swe', config='--psm 6')
+
+                  # Simple post-processing: Check if the result is likely to be valid
+                  if text.strip() and text.strip() not in self.recognized_words and len(text.strip()) > 3:
+                      self.recognized_words.add(text.strip())
+                      print(text)
+                      # Display the ROI for debugging
+                      cv2.imshow(f'ROI {x},{y}', roi_thresh)
+
+
 
 
     
