@@ -43,39 +43,52 @@ class MainApp(MDApp):
           # Convert to HSV color space to detect blue color
           hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
           # Define the range for blue color and create a mask
-          lower_blue = np.array([100, 150, 50])
-          upper_blue = np.array([140, 255, 255])
+          lower_blue = np.array([100, 150, 50])  # You need to adjust these values
+          upper_blue = np.array([140, 255, 255])  # You need to adjust these values
           mask = cv2.inRange(hsv, lower_blue, upper_blue)
-
+          
           # Find contours in the mask
           contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+          
+          # Sort contours based on the y-coordinate of their bounding rect, top to bottom
+          sorted_contours = sorted(contours, key=lambda c: cv2.boundingRect(c)[1])
 
-          for contour in contours:
+          # List to hold all detected text areas
+          detected_texts = []
+
+          for contour in sorted_contours:
               # Approximate the contour to a polygon
               epsilon = 0.1 * cv2.arcLength(contour, True)
               approx = cv2.approxPolyDP(contour, epsilon, True)
 
-              # Check if the approximated polygon has four sides (i.e., is a rectangle or square)
+              # Check if the approximated polygon has four sides
               if len(approx) == 4:
                   x, y, w, h = cv2.boundingRect(approx)
 
-                  # Extract ROI with some padding
-                  padding = 5  # Adjust padding as needed
-                  roi = frame[y-padding:y+h+padding, x-padding:x+w+padding]
+                  # Extract ROI
+                  roi = frame[y:y+h, x:x+w]
 
-                  # Convert ROI to grayscale and apply threshold
+                  # Convert ROI to grayscale
                   roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+
+                  # Apply a binary threshold to the ROI
                   _, roi_thresh = cv2.threshold(roi_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-                  # Apply OCR on the thresholded ROI
+                  # Use Tesseract to do OCR on the extracted ROI
                   text = pytesseract.image_to_string(roi_thresh, lang='swe', config='--psm 6')
 
-                  # Simple post-processing: Check if the result is likely to be valid
-                  if text.strip() and text.strip() not in self.recognized_words and len(text.strip()) > 3:
-                      self.recognized_words.add(text.strip())
-                      print(text)
-                      # Display the ROI for debugging
-                      cv2.imshow(f'ROI {x},{y}', roi_thresh)
+                  # Clean up text
+                  text = text.strip()
+
+                  if text:
+                      detected_texts.append((y, text))
+
+          # Sort the detected text areas based on the y-coordinate
+          detected_texts.sort(key=lambda item: item[0])
+
+          # Output the text in order
+          for _, text in detected_texts:
+              print(text)
 
 
 
