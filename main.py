@@ -90,13 +90,6 @@ class MainApp(MDApp):
           for _, text in detected_texts:
               print(text)
 
-
-
-
-    
-
-
-
     def on_stop(self):
         self.cap.release()
 
@@ -104,3 +97,4 @@ if __name__ == '__main__':
     pytesseract.pytesseract.tesseract_cmd = r'D:\Tesseract-OCR\tesseract.exe'
 
     MainApp().run()
+S
