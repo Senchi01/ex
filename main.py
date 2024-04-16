@@ -27,14 +27,15 @@ class MainApp(MDApp):
         return layout
 
     def update(self, dt):
-        # Capture frame-by-frame
-        ret, frame = self.cap.read()
-        if ret:
-            # Convert frame to texture
-            buf = cv2.flip(frame, 0).tobytes()
-            texture = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt='bgr')
-            texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
-            self.image.texture = texture
+    # Capture frame-by-frame
+      ret, frame = self.cap.read()
+      if ret:
+          # Convert frame to texture
+          buf = cv2.flip(frame, 0).tobytes()
+          texture = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt='bgr')
+          texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
+
+          self.image.texture = texture
 
 
     def take_picture(self, *args):
@@ -52,7 +53,6 @@ class MainApp(MDApp):
           
           # Sort contours based on the y-coordinate of their bounding rect, top to bottom
           sorted_contours = sorted(contours, key=lambda c: cv2.boundingRect(c)[1])
-
           # List to hold all detected text areas
           detected_texts = []
 
@@ -64,7 +64,7 @@ class MainApp(MDApp):
               # Check if the approximated polygon has four sides
               if len(approx) == 4:
                   x, y, w, h = cv2.boundingRect(approx)
-
+    
                   # Extract ROI
                   roi = frame[y:y+h, x:x+w]
 
@@ -74,11 +74,12 @@ class MainApp(MDApp):
                   # Apply a binary threshold to the ROI
                   _, roi_thresh = cv2.threshold(roi_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-                  # Use Tesseract to do OCR on the extracted ROI
-                  text = pytesseract.image_to_string(roi_thresh, lang='swe', config='--psm 6')
-
-                  # Clean up text
-                  text = text.strip()
+                  # Adjusting pytesseract config
+                  custom_config=r'--oem 3 --psm 6'
+                  
+                  text=pytesseract.image_to_string(roi_thresh,
+                                                   lang='swe',
+                                                   config=custom_config).strip()
 
                   if text:
                       detected_texts.append((y, text))
@@ -87,7 +88,7 @@ class MainApp(MDApp):
           detected_texts.sort(key=lambda item: item[0])
 
           # Output the text in order
-          for _, text in detected_texts:
+          for _,text in detected_texts:
               print(text)
 
     def on_stop(self):
@@ -97,4 +98,3 @@ if __name__ == '__main__':
     pytesseract.pytesseract.tesseract_cmd = r'D:\Tesseract-OCR\tesseract.exe'
 
     MainApp().run()
-S
