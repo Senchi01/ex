@@ -12,6 +12,7 @@ class MainApp(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.recognized_words = set()
+
     def build(self):
         layout = MDBoxLayout(orientation='vertical')
         self.image = Image()
@@ -44,10 +45,11 @@ class MainApp(MDApp):
           # Convert to HSV color space to detect blue color
           hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
           # Define the range for blue color and create a mask
-          lower_blue = np.array([100, 150, 50])  # You need to adjust these values
-          upper_blue = np.array([140, 255, 255])  # You need to adjust these values
+          lower_blue = np.array([90, 100, 50]) 
+          upper_blue = np.array([159, 255, 255])  
           mask = cv2.inRange(hsv, lower_blue, upper_blue)
-          
+          masked = cv2.bitwise_and(frame, frame, mask=mask)
+
           # Find contours in the mask
           contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
           
@@ -67,7 +69,6 @@ class MainApp(MDApp):
     
                   # Extract ROI
                   roi = frame[y:y+h, x:x+w]
-
                   # Convert ROI to grayscale
                   roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
 
