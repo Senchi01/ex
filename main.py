@@ -49,7 +49,7 @@ class MainApp(MDApp):
           upper_blue = np.array([159, 255, 255])  
           mask = cv2.inRange(hsv, lower_blue, upper_blue)
           masked = cv2.bitwise_and(frame, frame, mask=mask)
-
+          cv2.imshow("masked", masked)
           # Find contours in the mask
           contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
           
@@ -68,12 +68,13 @@ class MainApp(MDApp):
                   x, y, w, h = cv2.boundingRect(approx)
     
                   # Extract ROI
-                  roi = frame[y:y+h, x:x+w]
+                  roi = masked[y:y+h, x:x+w]
                   # Convert ROI to grayscale
                   roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
 
                   # Apply a binary threshold to the ROI
                   _, roi_thresh = cv2.threshold(roi_gray, 125, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                  cv2.imshow("roi_thresh",roi_thresh)
 
                   # Adjusting pytesseract config
                   custom_config=r'--oem 3 --psm 6'
