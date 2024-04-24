@@ -73,7 +73,7 @@ class MainApp(MDApp):
                   roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
 
                   # Apply a binary threshold to the ROI
-                  _, roi_thresh = cv2.threshold(roi_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                  _, roi_thresh = cv2.threshold(roi_gray, 125, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
                   # Adjusting pytesseract config
                   custom_config=r'--oem 3 --psm 6'
