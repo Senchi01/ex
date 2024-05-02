@@ -7,11 +7,13 @@ from kivy.clock import Clock
 import cv2
 import numpy as np
 import pytesseract
+import datetime 
 
 class MainApp(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.recognized_words = set()
+        
 
     def build(self):
         layout = MDBoxLayout(orientation='vertical')
@@ -39,6 +41,62 @@ class MainApp(MDApp):
           self.image.texture = texture
 
 
+    def parking_rule(self, wordList):
+       current_date = datetime.datetime.now()
+       dayName = current_date.strftime('%A')
+       currentHour = current_date.hour
+
+       if len(wordList) == 1 and wordList[0] == 'P':
+          return "Parking is permitted for 24 hours"
+       elif wordList[0] == 'P' and wordList[1] == '&':
+          return "Parking is permitted for Handicap only"
+       elif 'Avgift' in wordList:
+          AvgiftIndex = wordList.index('Avgift')
+          if 'tim' in wordList[AvgiftIndex+1]: 
+             elmt = wordList[AvgiftIndex+1]
+             time = elmt[0]
+             timeIndex = wordList.index(elmt)
+             if dayName not in ['Saturday', 'Sunday']:
+                timeInterval = wordList[timeIndex+1]
+                timeSplitted = timeInterval.split('-')
+                startTime = int(timeSplitted[0])
+                endTime = int(timeSplitted[1])
+                if startTime < currentHour and currentHour < endTime:
+                  if (currentHour + int(time)) <= endTime:
+                      return "Parking is permitted for max " + time + " hours with fee"
+                  elif (currentHour + int(time)) > endTime:
+                     newTime = (currentHour + int(time)) - endTime
+                     if newTime < time :
+                      return "Parking is permitted for " + time + " hours with fee then it's free"
+                  else:
+                      return "Parking is permitted to %d", startTime
+          elif 'tim' in wordList[AvgiftIndex-1]:
+            elmt = wordList[AvgiftIndex-1]
+            time = elmt[0]
+            timeIndex = wordList.index(elmt)
+            if dayName not in ['Saturday', 'Sunday']:
+              timeInterval = wordList[AvgiftIndex+1]
+              timeSplitted = timeInterval.split('-')
+              startTime = int(timeSplitted[0])
+              endTime = int(timeSplitted[1])
+              if startTime < currentHour and currentHour < endTime:
+                if (currentHour + int(time)) <= endTime:
+                  return "Parking is permitted for max " + time + " hours with fee"
+                elif (currentHour + int(time)) > endTime:
+                  newTime = (currentHour + int(time)) - endTime
+                  if newTime < time :
+                    return "Parking is permitted for " + time + " hours with fee then it's free"
+                else:
+                    return "Parking is permitted to %d", startTime
+
+          
+          
+          
+       
+       
+          
+
+
     def take_picture(self, *args):
       ret, frame = self.cap.read()
       if ret:
@@ -49,7 +107,6 @@ class MainApp(MDApp):
           upper_blue = np.array([159, 255, 255])  
           mask = cv2.inRange(hsv, lower_blue, upper_blue)
           masked = cv2.bitwise_and(frame, frame, mask=mask)
-          cv2.imshow("masked", masked)
           # Find contours in the mask
           contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
           
@@ -74,7 +131,6 @@ class MainApp(MDApp):
 
                   # Apply a binary threshold to the ROI
                   _, roi_thresh = cv2.threshold(roi_gray, 125, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-                  cv2.imshow("roi_thresh",roi_thresh)
 
                   # Adjusting pytesseract config
                   custom_config=r'--oem 3 --psm 6'
@@ -84,15 +140,15 @@ class MainApp(MDApp):
                                                    config=custom_config).strip()
 
                   if text:
-                      detected_texts.append((y, text))
+                    detected_texts.extend(text.split('\n'))
 
           # Sort the detected text areas based on the y-coordinate
-          detected_texts.sort(key=lambda item: item[0])
-
           # Output the text in order
-          for _,text in detected_texts:
-              print(text)
-
+          for text in detected_texts:
+            print(text)
+          print(self.parking_rule(detected_texts))
+          print(detected_texts)
+    
     def on_stop(self):
         self.cap.release()
 
