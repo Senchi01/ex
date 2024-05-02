@@ -51,51 +51,34 @@ class MainApp(MDApp):
        elif wordList[0] == 'P' and wordList[1] == '&':
           return "Parking is permitted for Handicap only"
        elif 'Avgift' in wordList:
-          AvgiftIndex = wordList.index('Avgift')
-          if 'tim' in wordList[AvgiftIndex+1]: 
-             elmt = wordList[AvgiftIndex+1]
-             time = elmt[0]
-             timeIndex = wordList.index(elmt)
-             if dayName not in ['Saturday', 'Sunday']:
-                timeInterval = wordList[timeIndex+1]
-                timeSplitted = timeInterval.split('-')
-                startTime = int(timeSplitted[0])
-                endTime = int(timeSplitted[1])
-                if startTime < currentHour and currentHour < endTime:
-                  if (currentHour + int(time)) <= endTime:
-                      return "Parking is permitted for max " + time + " hours with fee"
-                  elif (currentHour + int(time)) > endTime:
-                     newTime = (currentHour + int(time)) - endTime
-                     if newTime < time :
-                      return "Parking is permitted for " + time + " hours with fee then it's free"
-                  else:
-                      return "Parking is permitted to %d", startTime
-          elif 'tim' in wordList[AvgiftIndex-1]:
-            elmt = wordList[AvgiftIndex-1]
+          avgiftIndex = wordList.index('Avgift')
+          if 'tim' in wordList[avgiftIndex+1]: 
+            elmt = wordList[avgiftIndex+1]
             time = elmt[0]
             timeIndex = wordList.index(elmt)
-            if dayName not in ['Saturday', 'Sunday']:
-              timeInterval = wordList[AvgiftIndex+1]
+            return self.handleFee(dayName,wordList,timeIndex,currentHour,time)   
+
+          elif 'tim' in wordList[avgiftIndex-1]:
+            elmt = wordList[avgiftIndex-1]
+            time = elmt[0]
+            return self.handleFee(dayName,wordList,avgiftIndex,currentHour,time)   
+
+    def handleFee(self, dayName,wordList,index, ct, time ):
+       if dayName not in ['Saturday', 'Sunday']:
+              timeInterval = wordList[index+1]
               timeSplitted = timeInterval.split('-')
               startTime = int(timeSplitted[0])
               endTime = int(timeSplitted[1])
-              if startTime < currentHour and currentHour < endTime:
-                if (currentHour + int(time)) <= endTime:
+              if startTime < ct and ct < endTime:
+                if (ct + int(time)) <= endTime:
                   return "Parking is permitted for max " + time + " hours with fee"
-                elif (currentHour + int(time)) > endTime:
-                  newTime = (currentHour + int(time)) - endTime
+                elif (ct + int(time)) > endTime:
+                  newTime = (ct + int(time)) - endTime
                   if newTime < time :
                     return "Parking is permitted for " + time + " hours with fee then it's free"
                 else:
                     return "Parking is permitted to %d", startTime
-
-          
-          
-          
-       
-       
-          
-
+                
 
     def take_picture(self, *args):
       ret, frame = self.cap.read()
