@@ -58,41 +58,19 @@ class MainApp(MDApp):
           time = elmt[0]
           timeIndex = wordList.index(elmt)
           if dayName not in ['Saturday', 'Sunday']:
-            return self.handleFees(wordList,timeIndex,currentHour,time,isFee=True)
-          elif dayName == 'Saturday':
-              for i in wordList:
-                 if '(' in i:
-                    elmtIndex = wordList.index(i)
-                    return self.handleFees(wordList,elmtIndex-1,currentHour,time,isFee=True)  
-                 else:
-                    return f"parking is free"  
+            return self.handleFees(wordList,timeIndex+1,currentHour,time,isFee=True)
           else:
-            for i in wordList:
-              if '(' in i:
-                elmtIndex = wordList.index(i)
-                return self.handleFees(wordList,elmtIndex-1,currentHour,time,isFee=True)
-              else:
-                    return f"parking is free"  
+            return self.handleWeekend(wordList, currentHour, time, dayName)
+  
         elif 'tim' in wordList[avgiftIndex-1]:
           elmt = wordList[avgiftIndex-1]
           time = elmt[0]
           timeIndex = wordList.index(elmt)
           if dayName not in ['Saturday', 'Sunday']:
-            return self.handleFees(wordList,avgiftIndex,currentHour,time,isFee=True)
-          elif dayName == 'Saturday':
-              for i in wordList:
-                 if '(' in i:
-                    elmtIndex = wordList.index(i)
-                    return self.handleFees(wordList,elmtIndex-1,currentHour,time,isFee=True) 
-                 else:
-                    return f"parking is free"    
+            return self.handleFees(wordList,avgiftIndex+1,currentHour,time,isFee=True)
           else:
-            for i in wordList:
-              if '(' in i:
-                elmtIndex = wordList.index(i)
-                return self.handleFees(wordList,elmtIndex-1,currentHour,time,isFee=True)
-              else:
-                    return f"parking is free"  
+            return self.handleWeekend(wordList, currentHour, time, dayName)
+
       elif 'P-tillstånd' in wordList:
         return f'Parking not permitted. permission needed!'
       elif 'Avgift' not in wordList:
@@ -104,13 +82,18 @@ class MainApp(MDApp):
 
 
        
-
+    def handleWeekend(self, wordList, currentHour, time, dayName):
+      for i in wordList:
+          if '(' in i:
+              elmtIndex = wordList.index(i)
+              if dayName == "Saturday":
+                  return self.handleFees(wordList, elmtIndex, currentHour, time, isFee=True)
+              elif dayName == "Sunday":
+                  if len(wordList) >= elmtIndex + 1:
+                      return self.handleFees(wordList, elmtIndex+1, currentHour, time, isFee=True)
+      return "Parking is free"
 
     def handleFees(self,wordList,index, ct, time, isFee ):
-        if len(wordList) > index + 1:
-           index += 1
-        else:
-           index = index
         timeInterval = wordList[index]
         timeIntervalIndex = wordList.index(timeInterval)
         timeInterval = re.sub(r'[^\d-]', '', timeInterval) 
@@ -119,8 +102,7 @@ class MainApp(MDApp):
         if startTime in ['B',88, '&']:
             startTime = 8
         endTime = int(timeSplitted[1])
-         # Convert `time` by extracting digits and turning into an integer
-        timeDigits = re.findall(r'\d+', time)  # Finds all digit groups
+        timeDigits = re.findall(r'\d+', time)  
         if timeDigits:
           time = int(timeDigits[0])  # Take the first group of digits found
         if startTime < ct and ct < endTime:
