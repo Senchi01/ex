@@ -123,26 +123,25 @@ class MainApp(MDApp):
             output = self.handleWeekend(wordList, currentHour, time, dayName,isFee=True)
       elif 'P-tillstånd' in wordList:
         output = f'Parking not permitted. permission needed!'
-      elif 'Avgift' not in wordList:
+      else:
          for timeIndex, elmt in enumerate(wordList):
             if 'tim' in elmt:
               time = self.extractTime(elmt)
-              print(timeIndex, "sads")
               if dayName not in ['Saturday', 'Sunday']:
-                if len(wordList) >= timeIndex + 1:
-                  output = self.handleFees(wordList,timeIndex + 1,currentHour,time,isFee=False)
+                if len(wordList) > timeIndex + 1:
+                  output = self.handleFees(wordList,timeIndex+1,currentHour,time,isFee=False)
                 else:
                   output = f"parking is permitted for {time} hours with parking disc\nthen you need to park again."
               else:
-                if len(wordList) >= timeIndex + 1:
+                if len(wordList) > timeIndex + 1:
                   output = self.handleWeekend(wordList, currentHour, time, dayName,isFee=False)
                 else:
                   output = f"parking is permitted for {time} hours with parking disc\nthen you need to park again."
-            else:
+            elif 'tim' not in elmt :
               if dayName not in ['Saturday', 'Sunday'] and len(wordList) >= 2:
-                output = self.handleFees(wordList,1,currentHour,'0',isFee=False)
+                output = self.handleFees(wordList,1,currentHour,0,isFee=False)
               else:
-                output = self.handleWeekend(wordList, currentHour, '0', dayName,isFee=False)
+                output = self.handleWeekend(wordList, currentHour, 0, dayName,isFee=False)
       return output
     
     def handleWeekend(self, wordList, currentHour, time, dayName, isFee):
@@ -156,23 +155,25 @@ class MainApp(MDApp):
                     return self.handleFees(wordList, elmtIndex + 1, currentHour, time, isFee)
       return "Parking is free"
 
-    def handleFees(self,wordList,index, ct, time, isFee ):
+    def handleFees(self,wordList,timeIntervalIndex, ct, time, isFee ):
         output = ''
-        timeInterval = wordList[index]
-        timeIntervalIndex = wordList.index(timeInterval)
+        timeInterval = wordList[timeIntervalIndex]
         timeInterval = re.sub(r'[^\d-]', '', timeInterval) 
-        timeSplitted = timeInterval.split('-')
-        startTime = int(timeSplitted[0])
-        if startTime in ['B',88, '&']:
-            startTime = 8
-        endTime = int(timeSplitted[1])
-        if time != '0':
-          if startTime < ct and ct < endTime:
-            if (ct + int(time)) <= endTime and isFee:
+        if '-' in timeInterval:
+          timeSplitted = timeInterval.split('-')
+          startTime = int(timeSplitted[0])
+          if startTime in ['B',88, '&']:
+              startTime = 8
+          endTime = int(timeSplitted[1])
+        else:
+           return timeInterval
+        if time != 0:
+          if startTime < ct and ct < endTime and isFee:
+            if (ct + int(time)) <= endTime :
               output = f"Parking is permitted for max {time} hours with fee"
             elif (ct + int(time)) > endTime:
               newTime = (ct + int(time)) - endTime
-              if newTime < int(time) and isFee :
+              if newTime < int(time) :
                 output = f"Parking is permitted for {newTime} hours with fee then it's free"
           elif len(wordList) > timeIntervalIndex+1 and ct < startTime:
             output = f"Parking is free to {startTime}"
@@ -182,7 +183,7 @@ class MainApp(MDApp):
           if startTime < ct and ct < endTime:
             output = f"parking is permitted until {endTime}, then no parking"
           else:
-            output = f"Parking is not permittedww"
+            output = f"Parking is not permitted"
         return output
                       
 
