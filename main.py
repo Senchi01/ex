@@ -130,6 +130,7 @@ class MainApp(MDApp):
               if dayName not in ['Saturday', 'Sunday']:
                 if len(wordList) > timeIndex + 1:
                   output = self.handleFees(wordList,timeIndex+1,currentHour,time,isFee=False)
+                  break
                 else:
                   output = f"parking is permitted for {time} hours with parking disc\nthen you need to park again."
               else:
