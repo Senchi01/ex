@@ -37,7 +37,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,Kivy==2.3.0,kivymd==1.2.0,opencv,numpy,pytesseract,pillow,packaging
+requirements = python3,Kivy==2.3.0,kivymd==1.2.0,opencv==4.5.2,numpy,pytesseract,pillow,packaging
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -104,7 +104,7 @@ android.permissions = CAMERA, INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_ST
 #android.api = 31
 
 # (int) Minimum API your APK / AAB will support.
-#android.minapi = 21
+android.minapi = 24
 
 # (int) Android SDK version to use
 #android.sdk = 20
@@ -113,7 +113,7 @@ android.permissions = CAMERA, INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_ST
 #android.ndk = 23b
 
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
-#android.ndk_api = 21
+android.ndk_api = 24
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 #android.private_storage = True
