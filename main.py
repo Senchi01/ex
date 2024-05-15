@@ -22,7 +22,7 @@ class MainApp(MDApp):
           text='Capture and Read',
           pos_hint={'center_x': 0.5, 'center_y': 0.5},
           size_hint=(None, None))
-      self.capture_button.bind(on_press=self.take_picture)
+      self.capture_button.bind(on_press=self.takePicture)
       self.cap = cv2.VideoCapture(0,cv2.CAP_ANDROID)  
       Clock.schedule_interval(self.update, 1.0 / 30.0) 
       self.outputlabel = MDLabel(
@@ -44,7 +44,7 @@ class MainApp(MDApp):
           texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
           self.image.texture = texture
 
-    def take_picture(self, *args):
+    def takePicture(self, *args):
       ret, frame = self.cap.read()
       if ret:
           # Convert to HSV color space to detect blue color
@@ -90,13 +90,13 @@ class MainApp(MDApp):
                     detected_texts.extend(text.split('\n'))
 
           print(detected_texts)
-          parkingRule = self.parking_rule(detected_texts)
+          parkingRule = self.parkingRule(detected_texts)
           if parkingRule is not None:
             self.outputlabel.text = parkingRule    
           else:
             self.outputlabel.text = "No text are read"
 
-    def parking_rule(self, wordList):
+    def parkingRule(self, wordList):
       current_date = datetime.datetime.now()
       dayName = current_date.strftime('%A')
       currentHour = current_date.hour
@@ -195,7 +195,7 @@ class MainApp(MDApp):
       else:
           return 0 
     
-    def on_stop(self):
+    def onStop(self):
         self.cap.release()
 
 if __name__ == '__main__':
