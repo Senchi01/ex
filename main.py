@@ -184,7 +184,7 @@ class MainApp(MDApp):
           elif len(wordList) > timeIntervalIndex + 1 and ct < startTime:
             output = f"Parking is free to {startTime}"
           else:
-            output = f"Parking is permitted"
+            output = f"Parking is permitted for free"
         else:
           if startTime < ct and ct < endTime:
             output = f"parking is permitted until {endTime}, then no parking"
