@@ -104,7 +104,7 @@ android.permissions = CAMERA, INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_ST
 #android.api = 31
 
 # (int) Minimum API your APK / AAB will support.
-android.minapi = 24
+#android.minapi = 24
 
 # (int) Android SDK version to use
 #android.sdk = 20
@@ -113,7 +113,7 @@ android.minapi = 24
 #android.ndk = 23b
 
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
-android.ndk_api = 24
+#android.ndk_api = 24
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 #android.private_storage = True

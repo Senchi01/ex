@@ -23,7 +23,7 @@ class MainApp(MDApp):
           pos_hint={'center_x': 0.5, 'center_y': 0.5},
           size_hint=(None, None))
       self.capture_button.bind(on_press=self.take_picture)
-      self.cap = cv2.VideoCapture(0)  
+      self.cap = cv2.VideoCapture(0,cv2.CAP_ANDROID)  
       Clock.schedule_interval(self.update, 1.0 / 30.0) 
       self.outputlabel = MDLabel(
           pos_hint={'center_x': 0.5, 'center_y': 0.5},
