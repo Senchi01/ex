@@ -23,7 +23,7 @@ class MainApp(MDApp):
           pos_hint={'center_x': 0.5, 'center_y': 0.5},
           size_hint=(None, None))
       self.capture_button.bind(on_press=self.takePicture)
-      self.cap = cv2.VideoCapture(0,cv2.CAP_ANDROID)  
+      self.cap = cv2.VideoCapture(0)  
       Clock.schedule_interval(self.update, 1.0 / 30.0) 
       self.outputlabel = MDLabel(
           pos_hint={'center_x': 0.5, 'center_y': 0.5},
@@ -169,14 +169,19 @@ class MainApp(MDApp):
         else:
            return timeInterval
         if time != 0:
-          if startTime < ct and ct < endTime and isFee:
-            if (ct + int(time)) <= endTime :
-              output = f"Parking is permitted for max {time} hours with fee"
-            elif (ct + int(time)) > endTime:
+          if startTime < ct and ct < endTime:
+            if (ct + int(time)) <= endTime and isFee :
+              output = f"Parking is permitted for {time} hours with fee"
+            elif (ct + int(time)) > endTime and isFee:
               newTime = (ct + int(time)) - endTime
               if newTime < int(time) :
                 output = f"Parking is permitted for {newTime} hours with fee then it's free"
-          elif len(wordList) > timeIntervalIndex+1 and ct < startTime:
+            elif (ct + int(time)) <= endTime and not isFee:
+               output = f"Parking is permitted for {time} hours for free then you need to park again"
+            elif (ct + int(time)) > endTime and not isFee:  
+              output = f"Parking is permitted"
+               
+          elif len(wordList) > timeIntervalIndex + 1 and ct < startTime:
             output = f"Parking is free to {startTime}"
           else:
             output = f"Parking is permitted"
