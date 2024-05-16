@@ -103,6 +103,8 @@ class MainApp(MDApp):
       output = ''
       if len(wordList) == 1 and wordList[0] == 'P':
         output = "Parking is permitted for 24 hours"
+      elif 'P' and '&' in wordList:
+         output = "Parking is permitted for handicap only. Special persmission is required"
       elif 'Avgift' in wordList:
         avgiftIndex = wordList.index('Avgift')
         if 'tim' in wordList[avgiftIndex+1]: 
